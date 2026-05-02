@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	ora "github.com/sijms/go-ora/v2"
 )
@@ -26,10 +27,10 @@ func GetDBDriver() *sql.DB {
 	}
 	connStr := ora.BuildUrl(os.Getenv("db_server"), dbPort, os.Getenv("db_service_name"), os.Getenv("db_username"), os.Getenv("db_password"), nil)
 	conn, err := sql.Open("oracle", connStr)
-	conn.SetMaxIdleConns(50)
-	conn.SetMaxOpenConns(50)
-	conn.SetConnMaxLifetime(0)
-	conn.SetConnMaxIdleTime(0)
+	conn.SetMaxIdleConns(GetEnv("db_max_idle_conns", 50))
+	conn.SetMaxOpenConns(GetEnv("db_max_open_conns", 50))
+	conn.SetConnMaxLifetime(time.Duration(GetEnv[int64]("db_conn_max_lifetime", 0)) * time.Minute)
+	conn.SetConnMaxIdleTime(time.Duration(GetEnv[int64]("db_conn_max_idle_time", 0)))
 	// check for error
 	if err != nil {
 		log.Fatal("Failed to create database connection: ", err)

@@ -3,12 +3,14 @@ package utils
 import (
 	"os"
 	"strconv"
+
+	"golang.org/x/exp/constraints"
 )
 
 // GetEnv retrieves the value of the environment variable named by the key. If the variable is not present, it returns the default value provided.
-func GetEnv(key string, defaultValue any) any {
+func GetEnv[T constraints.Ordered](key string, defaultValue T) T {
 	value, exists := os.LookupEnv(key)
-	switch defaultValue.(type) {
+	switch any(defaultValue).(type) {
 	case int:
 		if !exists {
 			return defaultValue
@@ -17,13 +19,13 @@ func GetEnv(key string, defaultValue any) any {
 		if err != nil {
 			return defaultValue
 		}
-		return intValue
+		return T(intValue)
 	case string:
 		if !exists {
 			return defaultValue
 		}
-		return value
+		return any(value).(T)
 	default:
-		return value
+		return defaultValue
 	}
 }
